@@ -1,14 +1,14 @@
 #!/usr/bin/python
 from PyNEC import *
+from math import sqrt
 class helix(object):
-    def __init__(self, length, diameter, space):
+    def __init__(self, freq, length, diameter, space):
+        self.freq=freq*10**6
         self.length=length
         self.radius=diameter/2
         self.space=space
 
     def run(self):
-        self.maximum=1.0
-    def run_old(self):
     	context=nec_context()
     	geo=context.get_geometry()
     	#helix(int tag_id, int segcount, double s, double hl, double a1, double b1, double a2, dboule b2, double rad)
@@ -30,12 +30,19 @@ class helix(object):
     	context.geometry_complete(1)
     	context.gn_card(1, 0, 0, 0, 0, 0, 0, 0)
     	context.ex_card(0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0)
-    	context.fr_card(0, 1, 144.0e6, 1)
-    	context.rp_card(0, 181, 1, 0, 5, 1, 1, -90, 90, 1.0, 1.0, 1, 0)
+    	context.fr_card(0, 1, self.freq, 0)
+    	#context.rp_card(0, 181, 1, 0, 5, 1, 1, -90, 90, 1.0, 1.0, 1, 0)
     	#context.rp_card(0, 181, 1, 0, 5, 1, 1, -90, 0, 1.0, 1.0, 1, 0)
-    	rp = context.get_radiation_pattern(0)
-    	self.maximum=numpy.amax(rp.get_gain_tot())
-       	#return -maximum #Negative f to find the max instead of the min
+    	#rp = context.get_radiation_pattern(0)
+        context.ex_card(5, 0, 5, 0, 0, 1, 0, 0, 0, 0, 0)
+        context.xq_card(0)
+        ai = context.get_antenna_input(0)
+        c = ai.get_current()
+        v = ai.get_voltage()
+        i = v[0]/c[0]
+        I=50
+        rc=sqrt(((i.real-I)**2+i.imag**2)/((i.real+I)**2+i.imag**2))
+        self.vswr=(1+rc)/(1-rc)
 
 class yagi(object):
     def __init__(self, length, width, height):

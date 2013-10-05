@@ -93,18 +93,22 @@ def opt(hyp):
 	return best, rad, length, space
 
 def main():
+	#rad=list(numpy.arange(0.01,0.3,rad_step))
+	#length=list(numpy.arange(0.1,1.9,length_step))
+	#space=list(numpy.arange(0.05,0.4,space_step))
+    freq=144.0
     l=2
     d=2
     steps=10
-    length=numpy.linspace(0,l,l*steps)
-    diameter=numpy.linspace(0,d,d*steps)
+    length=numpy.linspace(0.01,l,l*steps)
+    diameter=numpy.linspace(0.01,d,d*steps)
     count=0
     print 'Filling Queue'
     for l in length:
         for d in diameter:
-            space=numpy.linspace(0,l,l*steps)
+            space=numpy.linspace(0.01,l,l*steps)
             for s in space:
-                work_queue.put(helix(l,d,s),1,1)
+                work_queue.put(helix(freq,l,d,s),1,1)
                 count+=1
                 sys.stdout.write('\r'+str(count))
     size=work_queue.qsize()
@@ -124,13 +128,14 @@ def main():
         t.join()
     print 'Joined threads'
     print str(100*done_queue.qsize()/size)+'% passed'
+    print 'Done with '+str(len(antennas))+' antennas'
     antennas=[]
     while not done_queue.empty():
-        antennas.append(done_queue.get(1,1))
-    #for a in antennas:
-    #    print a.maximum
+        a=done_queue.get(1,1)
+        if a.vswr>=1 and a.vswr<=3:
+            antennas.append(a)
+    print 'Reduced to '+len(antennas)+' antennas'
 
-    print 'Done with '+str(len(antennas))+' antennas'
 
 	#print('Generating hyp')
 	#hyp_val=hyp()
