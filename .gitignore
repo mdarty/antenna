@@ -3,3 +3,4 @@
 *.NEC
 *
 !*.py
+!LICENSE
